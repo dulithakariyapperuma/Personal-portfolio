@@ -1,0 +1,106 @@
+/* ---------------------------------------------------------------------------
+   THE IMMERSIVE LAYER — photography.
+
+   Same technique as journey-immersive.css: doubled class selectors
+   (`.photo-page .photo-hero`) give specificity 0,2,0 against the
+   original's 0,1,0, so this wins over every responsive block in
+   photography.css without !important, and the previous design stays one
+   import away.
+
+   This page was already the strongest of the three. What it was missing
+   was scale — a 1060px fixed wall and a wordmark pinned at top:115px look
+   the same on a laptop and a 32" monitor, which is what makes a site feel
+   like a page rather than a place.
+   --------------------------------------------------------------------------- */
+
+.photo-page {
+  --nav-h: clamp(60px, 7vh, 80px);
+  padding-top: var(--nav-h);
+}
+
+.photo-page .photo-nav {
+  height: var(--nav-h);
+  padding: 0 var(--gutter);
+}
+
+/* --- Hero -----------------------------------------------------------------
+   The wall fills what is left of the first screen instead of a hard 1060px,
+   so the photographs are the first thing you see at any window size. The
+   floor stops it collapsing to a letterbox on a short laptop. */
+.photo-page .photo-wall-viewport {
+  height: clamp(420px, calc(100svh - var(--nav-h) - 2rem), 1060px);
+}
+
+/* --- Wordmark -------------------------------------------------------------
+   Still overlaid on the wall, but at display scale and allowed to wrap on
+   narrow screens. The original forced `white-space: nowrap` at up to 225px,
+   which overflowed any viewport under about 1100px — invisibly, because
+   the page clips. */
+.photo-page .photo-hero-wordmark {
+  top: clamp(2rem, 7vh, 6rem);
+  left: var(--gutter);
+  right: var(--gutter);
+  font-size: var(--t-display);
+  letter-spacing: var(--track-display);
+  line-height: var(--leading-tight);
+  white-space: normal;
+  text-wrap: balance;
+  mix-blend-mode: difference;   /* stays legible over light and dark frames */
+}
+
+/* --- Rhythm ---------------------------------------------------------------
+   One fluid scale instead of 10px here and 60px there. */
+.photo-page .photo-work {
+  padding: var(--section-y) var(--gutter);
+}
+
+.photo-page .photo-grid {
+  column-gap: clamp(10px, 1.4vw, 26px);
+}
+
+.photo-page .photo-card {
+  margin-bottom: clamp(10px, 1.4vw, 26px);
+}
+
+/* A slow lift on hover. The photographs are the product; giving them a
+   physical response makes the grid feel handled rather than printed. */
+.photo-page .photo-card > div {
+  overflow: hidden;
+  transition: transform var(--d-base) var(--ease);
+}
+.photo-page .photo-card:hover > div { transform: scale(1.03); }
+
+.photo-page .photo-about {
+  margin: 0;
+  padding: var(--section-y) var(--gutter);
+  gap: clamp(1.5rem, 4vw, 5rem);
+}
+
+.photo-page .photo-about h2 {
+  font-size: var(--t-h2);
+  letter-spacing: var(--track-h2);
+  line-height: var(--leading-snug);
+  text-wrap: balance;
+}
+
+.photo-page .photo-about p {
+  font-size: var(--t-lead);
+  line-height: var(--leading-body);
+  max-width: 58ch;
+}
+
+/* --- Phones ---------------------------------------------------------------
+   One column for the about section, and the wall gets a shorter floor so
+   the grid below it is reachable without a long scroll. */
+@media (max-width: 760px) {
+  .photo-page .photo-about { grid-template-columns: 1fr; }
+  .photo-page .photo-wall-viewport {
+    height: clamp(340px, calc(100svh - var(--nav-h) - 1rem), 620px);
+  }
+  .photo-page .photo-hero-wordmark { mix-blend-mode: normal; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .photo-page .photo-card > div,
+  .photo-page .photo-card:hover > div { transition: none; transform: none; }
+}

@@ -14,6 +14,7 @@ import { PHOTOGRAPHS as photographs, PHOTO_COLLECTIONS, photographById } from '@
 import type { PhotoHit } from '@/lib/api';
 import '@/components/ask.css';
 import './photography.css';
+import './photography-immersive.css';
 
 const image = (id: string) => photographById(id).src;
 const footerCollections = [...PHOTO_COLLECTIONS.slice(1), PHOTO_COLLECTIONS[0]];
