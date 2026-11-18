@@ -1,0 +1,19 @@
+{
+  "name": "@portfolio/api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Semantic photo search and a retrieval-grounded portfolio assistant.",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "build:index": "node scripts/build-index.mjs",
+    "warm": "node scripts/warm-model.mjs"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.3.2"
+  },
+  "engines": {
+    "node": ">=22.12"
+  }
+}

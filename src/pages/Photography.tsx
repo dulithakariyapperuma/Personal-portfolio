@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion, useMotionValue, useSpring } from 'framer-motion';
 import AnimatedPhoto from '@/components/AnimatedPhoto';
+import AskPanel from '@/components/AskPanel';
+import PhotoSearch from '@/components/PhotoSearch';
 import PhotographyMenu from '@/components/PhotographyMenu';
 import PhotographyWall from '@/components/PhotographyWall';
 import PhotographyLogo from '@/components/PhotographyLogo';
@@ -9,6 +11,8 @@ import PhotographyStatement from '@/components/PhotographyStatement';
 import PhotographyContactSection from '@/components/PhotographyContact';
 import { photographyContact, photographyContactLinks } from '@/lib/photographyContact';
 import { PHOTOGRAPHS as photographs, PHOTO_COLLECTIONS, photographById } from '@/lib/photographyGallery';
+import type { PhotoHit } from '@/lib/api';
+import '@/components/ask.css';
 import './photography.css';
 
 const image = (id: string) => photographById(id).src;
@@ -16,6 +20,8 @@ const footerCollections = [...PHOTO_COLLECTIONS.slice(1), PHOTO_COLLECTIONS[0]];
 
 export default function Photography() {
   const [filter, setFilter] = useState('All');
+  // null = no active search, show the whole (filtered) collection.
+  const [hits, setHits] = useState<PhotoHit[] | null>(null);
   const [menu, setMenu] = useState(false);
   const [slideshow, setSlideshow] = useState(true);
   const [footerPreview, setFooterPreview] = useState<string | null>(null);
@@ -52,6 +58,14 @@ export default function Photography() {
       preload.src = photographs[(selected + offset + photographs.length) % photographs.length].fullSrc;
     }
   }, [selected]);
+  // When a search is active the grid shows its ranking; otherwise it shows
+  // the whole collection under the current filter. Both map back to indexes
+  // in `photographs`, so the full-screen viewer keeps working either way.
+  const visible = hits
+    ? hits.map(hit => photographs.find(photo => photo.id === hit.id)).filter(photo => photo !== undefined)
+    : photographs.filter(photo => filter === 'All' || photo.category === filter);
+  const scoreById = hits ? new Map(hits.map(hit => [hit.id, hit.score])) : null;
+
   function movePhoto(direction: number) {
     setSelected(current => current === null ? null : (current + direction + photographs.length) % photographs.length);
   }
@@ -67,7 +81,8 @@ export default function Photography() {
     </section>
     <PhotographyStatement/>
     <section className="photo-work photo-work-images-only" id="photographs" aria-label="Photographs">
-      <motion.div layout className="photo-grid"><AnimatePresence mode="popLayout">{photographs.filter(p => filter === 'All' || p.category === filter).map(p => <motion.button layout key={p.id} className={`photo-card card-${p.id}`} initial={{ opacity: 0, y: 25 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-40px' }} exit={{ opacity: 0, scale: .96 }} transition={{ duration: reduced ? 0 : .5 }} onClick={() => setSelected(photographs.indexOf(p))} aria-label={`Open ${p.title}`}><div style={{ aspectRatio: `${p.width} / ${p.height}` }}><AnimatedPhoto src={p.src} srcSet={p.srcSet} sizes="(max-width: 700px) 50vw, 33vw" width={p.width} height={p.height} alt={p.alt} delay={photographs.indexOf(p) * 2.7}/></div></motion.button>)}</AnimatePresence></motion.div>
+      <PhotoSearch category={filter} onResults={setHits}/>
+      <motion.div layout className="photo-grid"><AnimatePresence mode="popLayout">{visible.map(p => <motion.button layout key={p.id} className={`photo-card card-${p.id}`} initial={{ opacity: 0, y: 25 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-40px' }} exit={{ opacity: 0, scale: .96 }} transition={{ duration: reduced ? 0 : .5 }} onClick={() => setSelected(photographs.indexOf(p))} aria-label={`Open ${p.title}`}><div style={{ aspectRatio: `${p.width} / ${p.height}` }}><AnimatedPhoto src={p.src} srcSet={p.srcSet} sizes="(max-width: 700px) 50vw, 33vw" width={p.width} height={p.height} alt={p.alt} delay={photographs.indexOf(p) * 2.7}/></div>{scoreById?.has(p.id) && <span className="photo-search-score">{p.title} · match {scoreById.get(p.id)!.toFixed(2)}</span>}</motion.button>)}</AnimatePresence></motion.div>
     </section>
     <section className="photo-about" id="photo-about"><span>THE PERSON BEHIND THE FRAME</span><div><h2>I build with code.<br/>I compose with light.<br/><em>Curiosity connects both.</em></h2><p>Photography is my way of paying attention. To people. To places. To the small things that are easy to walk past. Blurryblue Photography is where I share that way of seeing.</p><Link to="/photography">Explore the brain behind the photograph <span>↗</span></Link></div></section>
     <PhotographyContactSection/>
@@ -76,6 +91,7 @@ export default function Photography() {
       <a className="photo-footer-signature" href="#photo-top" aria-label="Blurryblue Photography — back to top"><PhotographyLogo/></a><div className="photo-footer-bottom"><span>© {new Date().getFullYear()} Blurryblue Photography</span><a href="#photo-top">Back to top ↑</a></div>
       <AnimatePresence>{footerPreview && !reduced && <motion.img className="photo-footer-preview" key={footerPreview} src={image(footerPreview)} alt="" aria-hidden="true" style={{ x: previewSpringX, y: previewSpringY }} initial={{ opacity: 0, scale: .95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: .2 }}/>}</AnimatePresence>
     </footer>
+    <AskPanel/>
     {selected !== null && <dialog ref={dialog} className="photo-dialog" onCancel={event => { event.preventDefault(); close(); }} onClick={event => { if (event.target === event.currentTarget) close(); }} onKeyDown={event => { if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') { event.preventDefault(); movePhoto(event.key === 'ArrowRight' ? 1 : -1); } }} aria-label="Photograph viewer" onTouchStart={event => { const touch = event.touches[0]; touchStart.current = { x: touch.clientX, y: touch.clientY }; }} onTouchEnd={event => { const start = touchStart.current; touchStart.current = null; if (!start) return; const touch = event.changedTouches[0]; const dx = touch.clientX - start.x; const dy = touch.clientY - start.y; if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) movePhoto(dx < 0 ? 1 : -1); }}><button className="photo-close" onClick={close} autoFocus aria-label="Close photograph">Close ×</button><AnimatePresence mode="wait"><motion.figure key={selected} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: reduced ? 0 : .2 }}><img src={photographs[selected].fullSrc} width={photographs[selected].width} height={photographs[selected].height} alt={photographs[selected].alt} decoding="async"/><figcaption><h2>{photographs[selected].title}</h2><small>{photographs[selected].category} · Photography by Dulitha Kariyapperuma</small></figcaption></motion.figure></AnimatePresence><div className="photo-viewer-nav"><span className="photo-viewer-count" aria-live="polite" aria-atomic="true">{String(selected + 1).padStart(2, '0')} / {String(photographs.length).padStart(2, '0')}</span></div></dialog>}
   </main>;
 }

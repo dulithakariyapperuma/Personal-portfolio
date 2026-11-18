@@ -1,0 +1,110 @@
+# ---------------------------------------------------------------------------
+# The cluster.
+#
+#   docker compose up --build      start everything
+#   open http://localhost:8080
+#
+# Shape of it:
+#
+#            you
+#             |
+#        :8080 edge          nginx — reverse proxy, load balancer, router
+#         /         \          the ONLY container with a published port
+#        /           \
+#   web1 web2 web3   api1 api2
+#   static build      search + assistant
+#
+# Nothing but `edge` is reachable from your machine. The backends talk to
+# each other over a private Docker network by service name; `web1` resolves
+# only inside it. That is the same containment a real deployment relies on —
+# a bug in the app cannot expose a port you forgot about, because there is
+# no port to expose.
+# ---------------------------------------------------------------------------
+
+name: portfolio-cluster
+
+# Three web replicas from one image definition. YAML anchors keep them from
+# drifting apart: change the anchor, all three change.
+x-web: &web
+  build:
+    context: .
+    dockerfile: infra/web/Dockerfile
+  image: portfolio-web:latest
+  restart: unless-stopped
+  networks: [cluster]
+  expose: ["8080"]
+
+x-api: &api
+  build:
+    context: .
+    dockerfile: services/api/Dockerfile
+  image: portfolio-api:latest
+  restart: unless-stopped
+  networks: [cluster]
+  expose: ["8081"]
+  env_file:
+    - path: ./services/api/.env
+      required: false
+  volumes:
+    # Both replicas share one model cache, so the 25 MB download is not
+    # duplicated and a rebuilt container starts warm.
+    - model-cache:/app/.cache
+  deploy:
+    resources:
+      limits:
+        memory: 1g
+
+services:
+  edge:
+    image: nginx:1.27-alpine
+    container_name: portfolio-edge
+    restart: unless-stopped
+    ports:
+      - "8080:80"          # the single front door
+    volumes:
+      - ./infra/edge/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/edge/snippets:/etc/nginx/snippets:ro
+      - edge-cache:/var/cache/nginx
+    networks: [cluster]
+    depends_on:
+      web1: { condition: service_healthy }
+      web2: { condition: service_healthy }
+      web3: { condition: service_healthy }
+      api1: { condition: service_started }
+      api2: { condition: service_started }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # NGINX_ENVSUBST_FILTER pins the official entrypoint's envsubst pass to
+  # WEB_INSTANCE alone. Without it, envsubst is handed every variable name in
+  # the environment, and any that collides with an nginx variable used in the
+  # template (`$host`, `$uri`, `$scheme`) would be replaced with its shell
+  # value before nginx ever sees the file.
+  web1: { <<: *web, container_name: portfolio-web1, environment: { WEB_INSTANCE: web1, NGINX_ENVSUBST_FILTER: "WEB_INSTANCE" } }
+  web2: { <<: *web, container_name: portfolio-web2, environment: { WEB_INSTANCE: web2, NGINX_ENVSUBST_FILTER: "WEB_INSTANCE" } }
+  web3: { <<: *web, container_name: portfolio-web3, environment: { WEB_INSTANCE: web3, NGINX_ENVSUBST_FILTER: "WEB_INSTANCE" } }
+
+  api1:
+    <<: *api
+    container_name: portfolio-api1
+    environment:
+      API_INSTANCE: api1
+      PORT: 8081
+
+  api2:
+    <<: *api
+    container_name: portfolio-api2
+    environment:
+      API_INSTANCE: api2
+      PORT: 8081
+
+networks:
+  cluster:
+    driver: bridge
+
+volumes:
+  model-cache:
+  edge-cache:

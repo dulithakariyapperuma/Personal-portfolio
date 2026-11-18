@@ -1,0 +1,44 @@
+# ---------------------------------------------------------------------------
+# WEB REPLICA — a dumb, stateless static file server.
+#
+# Three identical copies of this run behind the edge. "Stateless" is what
+# makes that safe: no replica stores anything a visitor needs on their next
+# request, so any replica can serve any request, and killing one costs
+# nothing. That property is the whole reason horizontal scaling works.
+#
+# $WEB_INSTANCE is substituted from the environment at container start by
+# nginx's own envsubst entrypoint (see /etc/nginx/templates in the image).
+# ---------------------------------------------------------------------------
+
+server {
+  listen 8080;
+  server_name _;
+
+  root  /usr/share/nginx/html;
+  index index.html;
+
+  server_tokens off;
+  access_log off;          # the edge already logs; this keeps the lab readable
+
+  # The name of the replica that answered. The edge passes it straight
+  # through, so `curl -I localhost:8080` from the host shows you which of
+  # web1/web2/web3 you reached. This is how you watch load balancing happen.
+  add_header X-Served-By "${WEB_INSTANCE}" always;
+
+  # Per-replica health. The edge's passive checks use real traffic, but an
+  # orchestrator (Compose healthcheck, Kubernetes readinessProbe) polls this.
+  location = /healthz {
+    default_type application/json;
+    return 200 '{"ok":true,"role":"web","instance":"${WEB_INSTANCE}"}';
+  }
+
+  # Pre-compressed files, if the build produced any: nginx serves the .gz
+  # straight off disk instead of compressing the same bytes on every request.
+  gzip_static on;
+
+  location / {
+    # SPA fallback. /portfolio/photography is a client-side route with no file
+    # behind it, so a plain file server would 404 on a hard refresh.
+    try_files $uri $uri/ /index.html;
+  }
+}
