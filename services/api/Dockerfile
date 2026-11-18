@@ -5,9 +5,20 @@
 # request. A cold replica that has to fetch 25 MB before it can answer is a
 # replica that fails its readiness check and gets pulled out of rotation
 # right when you scaled up because you needed it.
+#
+# Debian slim, not Alpine, and that is not a preference. onnxruntime-node —
+# which actually runs the embedding model — ships prebuilt native binaries
+# linked against glibc. Alpine uses musl, so the binary cannot load at all:
+#
+#   Error loading shared library ld-linux-aarch64.so.1: No such file or
+#   directory (needed by .../onnxruntime_binding.node)
+#
+# The web image below stays on Alpine, because nginx serving files has no
+# native dependencies. Any package with a compiled component is worth
+# checking against musl before reaching for the smaller base image.
 # ---------------------------------------------------------------------------
 
-FROM node:24-alpine
+FROM node:24-slim
 WORKDIR /app
 
 ENV NODE_ENV=production \
