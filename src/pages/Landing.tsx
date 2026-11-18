@@ -1,5 +1,7 @@
 import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { motion, useReducedMotion, useScroll, useSpring } from 'framer-motion';
+import { DURATION, EASE } from '@/design/motion';
 
 // three.js is by far the heaviest dependency on the site. Loading it lazily
 // lets the headline and the lessons paint before the 3D cortex arrives; the
@@ -11,6 +13,7 @@ import { useBrainSound } from '@/lib/useBrainSound';
 import AskPanel from '@/components/AskPanel';
 import '@/components/ask.css';
 import './journey.css';
+import './journey-immersive.css';
 
 const SOURCES = {
   code: 'https://news.mit.edu/2020/brain-reading-computer-code-1215',
@@ -119,12 +122,19 @@ export default function Landing() {
     document.getElementById('mind')?.scrollIntoView({ behavior: 'instant', block: 'start' });
   }
   function selectRegion(id: RegionId) { if (!activity) return; const index = LESSONS[activity].findIndex(l => l.region === id); if (index >= 0) { setPlaying(false); setStep(index); } }
+  // A hairline that tracks how far down the page you are. useSpring smooths
+  // the raw scroll value — bound directly, it jitters on a trackpad.
+  const { scrollYProgress } = useScroll();
+  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30, mass: 0.3 });
+  const reducedMotion = useReducedMotion();
+
   return <main className={`journey ${(entering ? entering === 'R' : activity === 'photography') ? 'j-warm' : ''} ${entering ? 'is-selecting' : ''}`}>
+    <motion.div className="j-progress" style={{ scaleX: progress }} aria-hidden="true" />
     <header className="j-header"><a href="#mind" className="j-brand" onClick={home}><b>dk</b><span>DULITHA<br />KARIYAPPERUMA</span></a><nav aria-label="Page sections"><a href="#mind">The mind</a><a href="#connection">The connection</a><a href="#evidence">The evidence</a></nav><span className="j-header-note">ENGINEERING × PHOTOGRAPHY</span></header>
     <section id="mind" className={`j-mind ${activity ? 'is-exploring' : ''} ${entering ? 'is-entering' : ''}`} aria-label="Interactive brain journey">
       <button className="j-sound" onClick={sound.toggle} aria-pressed={sound.enabled} aria-label={sound.enabled ? 'Mute interaction sounds' : 'Enable interaction sounds'}><span className="j-sound-bars" aria-hidden="true"><i /><i /><i /><i /></span>Sound {sound.enabled ? 'on' : 'off'}</button>
       <div className="j-atmosphere" />
-      <div className="j-intro"><span className="j-kicker"><i /> AN INTERACTIVE PORTFOLIO OF CURIOSITY</span><h1>Two ways of seeing.<br /><em>One connected mind.</em></h1><p>I build with code. I compose with light.<br />Step inside the brain behind both.</p></div>
+      <div className="j-intro"><span className="j-kicker"><i /> AN INTERACTIVE PORTFOLIO OF CURIOSITY</span><h1><span className="line-mask"><motion.span style={{ display: 'block' }} initial={reducedMotion ? { opacity: 0 } : { y: '110%' }} animate={reducedMotion ? { opacity: 1 } : { y: '0%' }} transition={{ duration: DURATION.slow, ease: EASE }}>Two ways of seeing.</motion.span></span><span className="line-mask"><motion.em style={{ display: 'block' }} initial={reducedMotion ? { opacity: 0 } : { y: '110%' }} animate={reducedMotion ? { opacity: 1 } : { y: '0%' }} transition={{ duration: DURATION.slow, delay: 0.09, ease: EASE }}>One connected mind.</motion.em></span></h1><p>I build with code. I compose with light.<br />Step inside the brain behind both.</p></div>
       <div className="j-brain" aria-label="Drag the brain to rotate. Scroll to zoom. Choose cyan for programming or amber for photography."><Suspense fallback={null}><BrainScene activity={activity} region={entering ? entering === 'L' ? 'md' : 'visual' : lesson?.region ?? null} reset={reset} enteringSide={entering} hoveredSide={hover} onHoverSide={setHover} onSelect={choose} onRegion={selectRegion} onReady={() => setReady(true)} onError={() => setFailed(true)} /></Suspense></div>
       {(!ready || failed) && <p className="j-loading" role="status">{failed ? '3D unavailable. The lessons below still work.' : 'Assembling the mind…'}</p>}
       {!activity ? <div className="j-choices"><button className="j-choice coding" onClick={() => choose('L')} onMouseEnter={() => setHover('L')} onMouseLeave={() => setHover(null)} disabled={!!entering}><span className="j-kicker">01 / PROGRAMMING</span><h2>Make it<br /><em>work.</em></h2><p>Reason. Plan. Connect.</p><span className="j-choice-cta">Enter the coding mind <b>↗</b></span></button><button className="j-choice photography" onClick={() => choose('R')} onMouseEnter={() => setHover('R')} onMouseLeave={() => setHover(null)} disabled={!!entering}><span className="j-kicker">02 / PHOTOGRAPHY</span><h2>Make it<br /><em>felt.</em></h2><p>Notice. Compose. Capture.</p><span className="j-choice-cta">Enter the photographic mind <b>↗</b></span></button></div> : <>
