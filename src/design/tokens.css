@@ -61,6 +61,11 @@
   --gutter: clamp(1rem, 5vw, 5.5rem);
   --section-y: clamp(4rem, 12vh, 11rem);
 
+  /* The site header sits above the hero, so a 100svh hero actually ends
+     one header below the fold. Declared once here and subtracted wherever
+     a section wants to fill the screen. */
+  --header-h: clamp(72px, 9vh, 104px);
+
   /* --- Surfaces ---------------------------------------------------------- */
   --radius-sm: 8px;
   --radius-md: 14px;

@@ -22,11 +22,18 @@
    slides away, so a 100vh hero is always slightly taller than the screen. */
 .journey .j-mind {
   height: auto;
-  min-height: 100svh;
+  /* Not 100svh: the header is above this, so a full-viewport hero would end
+     one header-height below the fold and hide the entrances. */
+  min-height: calc(100svh - var(--header-h));
   max-width: none;
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  grid-template-areas: "intro" "stage" "choices";
+  /* Two rows, not three. The entrances share the stage cell with the brain
+     and sit over its lower corners, which is both the more immersive
+     composition and the only way this fits a 900px-tall laptop: stacked as
+     three rows it measured 294 + 468 + 311 + padding = 1190px, pushing the
+     primary call to action below the fold. */
+  grid-template-rows: auto 1fr;
+  grid-template-areas: "intro" "stage";
   align-items: center;
   padding: clamp(1.5rem, 4vh, 3.5rem) var(--gutter) clamp(2rem, 5vh, 4rem);
   gap: clamp(0.5rem, 2vh, 1.5rem);
@@ -74,7 +81,9 @@
   top: auto;
   width: 100%;
   height: 100%;
-  min-height: min(52svh, 520px);
+  /* A floor low enough that the 1fr row can still compress on a short
+     window, and high enough that the model is never a sliver. */
+  min-height: min(38svh, 360px);
   transition: opacity var(--d-base) var(--ease);
 }
 
@@ -83,14 +92,16 @@
    version pinned them at top:355px, which is why they collided with the
    model at some window sizes. */
 .journey .j-choices {
-  grid-area: choices;
+  grid-area: stage;          /* same cell as the brain — they overlap */
+  align-self: end;
   position: static;
   inset: auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: clamp(1rem, 4vw, 5rem);
   align-items: end;
-  pointer-events: none;
+  pointer-events: none;      /* children re-enable it; the gap stays
+                                draggable so the model is still grabbable */
   z-index: 3;
 }
 
@@ -131,7 +142,7 @@
 .journey .j-header {
   margin: 0;
   padding: 0 var(--gutter);
-  height: clamp(72px, 9vh, 104px);
+  height: var(--header-h);
 }
 
 /* --- Scroll progress ------------------------------------------------------
@@ -155,8 +166,9 @@
     padding-bottom: var(--s-7);
     gap: var(--s-5);
   }
-  .journey .j-brain { min-height: 46svh; }
-  .journey .j-choices { grid-template-columns: 1fr; gap: var(--s-5); }
+  .journey .j-mind { grid-template-rows: auto auto auto; grid-template-areas: "intro" "stage" "choices"; }
+  .journey .j-brain { min-height: 44svh; }
+  .journey .j-choices { grid-area: choices; grid-template-columns: 1fr; gap: var(--s-5); }
   .journey .j-choice.photography { justify-self: start; text-align: left; }
   .journey .j-choice { max-width: none; }
 }
