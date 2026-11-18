@@ -71,7 +71,7 @@ and the ability to restart any backend without a visitor noticing.
 `upstream web_pool` lists three backends. Watch it rotate:
 
 ```bash
-for i in $(seq 6); do curl -sI localhost:8080/ | grep -i x-served-by; done
+for i in $(seq 9); do curl -sI localhost:8080/ | grep -i x-served-by; done
 ```
 
 ```
@@ -79,8 +79,32 @@ x-served-by: web1
 x-served-by: web2
 x-served-by: web3
 x-served-by: web1
+x-served-by: web2
+x-served-by: web3
 ...
 ```
+
+### The `zone` directive, and why this looked broken at first
+
+The first version of this config had no `zone` in the upstream block, and
+the loop above printed `web1` eight times in a row before it started
+rotating. Over 30 requests the split was 10/11/9 — correct on average, and
+completely unconvincing to watch.
+
+The cause: `worker_processes auto` starts one nginx worker per CPU, eight on
+this machine, and **without `zone` each worker keeps its own round-robin
+counter in its own memory**. Eight workers each sent their first request to
+the first backend in the list. Only once every worker had served a few
+requests did the average come out even.
+
+`zone web_pool 64k` puts the balancer state in shared memory, so all workers
+advance one counter. It also makes passive health checks shared — otherwise
+each worker has to independently discover that a backend is dead, and a
+"removed from rotation" backend keeps getting traffic from the seven workers
+that have not found out yet.
+
+If a load balancer ever looks like it is ignoring you, check how many
+workers it has before you doubt the algorithm.
 
 Algorithms, in `infra/edge/nginx.conf` — swap the directive and re-run the
 loop above:
@@ -118,12 +142,27 @@ Same hostname, same port, six different destinations — chosen from the path:
 
 ```bash
 docker compose stop web2
+for i in $(seq 12); do curl -s -o /dev/null -w '%{http_code} ' localhost:8080/; done
+```
+
+```
+200 200 200 200 200 200 200 200 200 200 200 200
+```
+
+Not one 502. After two failed attempts nginx drops `web2` for ten seconds
+and `web1` and `web3` absorb everything. Bring it back:
+
+```bash
+docker compose start web2
+sleep 12
 for i in $(seq 9); do curl -sI localhost:8080/ | grep -i x-served-by; done
 ```
 
-Nothing 502s. After two failed attempts nginx drops `web2` for ten seconds
-and the other two absorb the traffic. Bring it back with
-`docker compose start web2` and it returns to rotation on its own.
+```
+web1  web3  web2  web1  web3  web2  web1  web3  web2
+```
+
+It rejoined the rotation without anyone telling it to.
 
 This is a **passive** health check — nginx learns from real requests that
 failed. Active checks, where the proxy polls `/healthz` on a timer and
@@ -159,7 +198,7 @@ curl -s -o /dev/null -w "%{size_download}\n" localhost:8080/assets/three-*.js
 curl -s -o /dev/null -w "%{size_download}\n" -H 'Accept-Encoding: gzip' localhost:8080/assets/three-*.js
 ```
 
-844 kB against roughly 228 kB, for one directive.
+844,435 bytes against 226,341 — a 73% saving, for one directive.
 
 ### Watch load balancing in the logs
 
