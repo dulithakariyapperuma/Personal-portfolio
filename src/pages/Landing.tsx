@@ -13,7 +13,6 @@ import { useBrainSound } from '@/lib/useBrainSound';
 import AskPanel from '@/components/AskPanel';
 import '@/components/ask.css';
 import './journey.css';
-import './journey-immersive.css';
 
 const SOURCES = {
   code: 'https://news.mit.edu/2020/brain-reading-computer-code-1215',

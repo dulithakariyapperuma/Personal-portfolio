@@ -5,7 +5,6 @@ import * as THREE from 'three';
 import { AnimatePresence, motion, useDragControls, useReducedMotion } from 'framer-motion';
 import { ArrowUpRight, Check, Command, Folder, FolderOpen, Grid2X2, HardDrive, LockKeyhole, Maximize2, Minus, Monitor, Search, Settings2, ShieldCheck, Terminal, UserRound, Volume2, VolumeX, X } from 'lucide-react';
 import './style.css';
-import './dck-immersive.css';
 import { DesktopAudio } from './audio';
 import TerminalApp, { initialTerminal } from './TerminalApp';
 import ProfileArchive from './ProfileArchive';
