@@ -19,7 +19,21 @@ function Sculpture({animated}:{animated:boolean}) {const ref=useRef<THREE.Group>
 function Background({animated}:{animated:boolean}) {return <div className="three-background"><Canvas camera={{position:[0,0,12],fov:48}} dpr={[1,1.5]} gl={{alpha:true}}><ambientLight intensity={2}/><directionalLight position={[5,8,8]} intensity={3}/><Suspense fallback={null}><Sculpture animated={animated}/></Suspense></Canvas></div>}
 function Logo({className=''}:{className?:string}){return <img className={className} src="/dck/logo.svg" alt="DCK CORP logo"/>}
 export default function DckOs(){
- useEffect(()=>{window.scrollTo(0,0);document.title='Programming portfolio — DCK CORP OS — Dulitha Kariyapperuma';},[]);
+ useEffect(()=>{
+  window.scrollTo(0,0);
+  document.title='Programming portfolio — DCK CORP OS — Dulitha Kariyapperuma';
+  // Barlow Condensed and DM Sans belong to this route alone. Requested here
+  // rather than from index.html so the brain and photography pages do not
+  // download them, and rather than from an @import so the fetch starts the
+  // moment this route renders instead of after its stylesheet parses.
+  const id='dck-webfonts';
+  if(!document.getElementById(id)){
+   const link=document.createElement('link');
+   link.id=id; link.rel='stylesheet';
+   link.href='https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap';
+   document.head.appendChild(link);
+  }
+ },[]);
  const [menu,setMenu]=useState(false);
  const [menuSearch,setMenuSearch]=useState('');
  const [intro,setIntro]=useState(()=>{try{return localStorage.getItem('dck-os-welcomed')!=='1'}catch{return true}});

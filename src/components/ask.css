@@ -103,7 +103,7 @@
   font: 400 13.5px 'Space Grotesk', system-ui, sans-serif; color: #eaf0fa;
   background: #0c1b35; border: 1px solid #1c3258; border-radius: 10px;
 }
-.ask-form input::placeholder { color: #6a7f9f; }
+.ask-form input::placeholder { color: #92a7c7; }
 .ask-form input:focus { outline: none; border-color: #3d6bb5; }
 .ask-form button {
   flex: none; padding: 0 17px; min-height: 42px;
@@ -121,12 +121,12 @@
   transition: border-color .2s;
 }
 .photo-search-field:focus-within { border-color: #3678ff; }
-.photo-search-icon { font-size: 19px; color: #6a7f9f; }
+.photo-search-icon { font-size: 19px; color: #92a7c7; }
 .photo-search-field input {
   flex: 1; min-width: 0; padding: 15px 0; border: none; background: none;
   font: 400 15px 'Space Grotesk', system-ui, sans-serif; color: #eaf0fa;
 }
-.photo-search-field input::placeholder { color: #6a7f9f; }
+.photo-search-field input::placeholder { color: #92a7c7; }
 .photo-search-field input:focus { outline: none; }
 .photo-search-field input::-webkit-search-cancel-button { display: none; }
 .photo-search-clear {

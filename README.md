@@ -46,9 +46,27 @@ npm run dev
 ## Checks
 
 ```bash
-npx tsc --noEmit            # types
+npx tsc --noEmit             # types
 node scripts/check-brain.mjs # mesh bounds, indices, region overlays
 npm run build                # production build
+```
+
+## Before you deploy
+
+The domain is substituted at build time, because Open Graph needs absolute
+URLs and a hard-coded one goes stale:
+
+```bash
+SITE_URL=https://your-domain.com npm run build
+```
+
+That fills the canonical, `og:url` and `og:image` tags and emits
+`robots.txt` and `sitemap.xml`. The default is in `vite.config.ts`.
+
+Regenerate the share card after changing the tagline or the photograph:
+
+```bash
+python3 scripts/make-og-image.py
 ```
 
 ---
@@ -98,6 +116,16 @@ The build is split so nothing downloads before it is needed:
 Content-hashed filenames are what make a one-year `immutable` cache header
 safe, and the edge sets exactly that for `/assets/`. `index.html` is never
 cached, because it names those hashed files.
+
+Webfonts follow the same rule. Space Grotesk and IBM Plex Mono are requested
+from `index.html` because every page uses them. Barlow Condensed and DM Sans
+belong to the programming desktop alone, so `DckOs.tsx` requests them on
+mount — not from an `@import` in its stylesheet, which would not start the
+download until the route's CSS had been fetched and parsed.
+
+Every page passes WCAG AA contrast (4.5:1 for body text, 3:1 for large),
+measured by compositing each element's real backdrop rather than reading one
+`background-color`.
 
 ---
 

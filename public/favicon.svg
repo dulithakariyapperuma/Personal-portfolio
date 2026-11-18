@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="One connected mind">
+  <!-- The site's idea in 16 pixels: two hemispheres, one shape. No text, so it
+       needs no webfont and stays legible when the browser draws it tiny. -->
+  <rect width="64" height="64" rx="14" fill="#020b1c"/>
+  <g fill="none" stroke-linecap="round">
+    <!-- left hemisphere — programming -->
+    <path d="M31 16a12 12 0 0 0-12 12v8a12 12 0 0 0 12 12z" stroke="#00d8f6" stroke-width="2.6" fill="#00d8f61a"/>
+    <!-- right hemisphere — photography -->
+    <path d="M33 16a12 12 0 0 1 12 12v8a12 12 0 0 1-12 12z" stroke="#d6ae7a" stroke-width="2.6" fill="#d6ae7a1a"/>
+    <!-- the connection across the middle -->
+    <path d="M32 14v36" stroke="#8fa3ab" stroke-width="1.6" opacity=".7"/>
+    <path d="M24 27h5M24 37h5M35 27h5M35 37h5" stroke="#8fa3ab" stroke-width="1.5" opacity=".45"/>
+  </g>
+</svg>
