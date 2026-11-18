@@ -6,25 +6,6 @@ import type { HemisphereId } from '@/lib/constants';
 import { useBrainSound } from '@/lib/useBrainSound';
 import './journey.css';
 
-
-
-const photographyUrl = import.meta.env.VITE_PHOTOGRAPHY_URL || 'https://www.yourphotographycustomdomain.com';
-
-const handlePortfolioClick = () => {
-  sound.play('confirm');
-  if (entering === 'L') {
-    // Coding portfolio stays internal
-    navigate('/portfolio/programming');
-  } else {
-    // Redirection to your different photography domain
-    // Use window.location.href to navigate directly in the same tab:
-    window.location.href = photographyUrl;
-
-    // OR use window.open(photographyUrl, '_blank') if you want it in a new tab!
-  }
-};
-
-
 const SOURCES = {
   code: 'https://news.mit.edu/2020/brain-reading-computer-code-1215',
   myth: 'https://uofuhealth.utah.edu/index.php/newsroom/news/2013/no-evidence-right-brained-vs-left-brained',

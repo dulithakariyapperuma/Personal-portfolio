@@ -48,3 +48,9 @@ ehthumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Claude Code worktrees
+.claude/worktrees/
+
+# Mac
+.DS_Store

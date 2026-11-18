@@ -1,0 +1,11 @@
+Anatomical surface: brain-surface.obj.gz, from BrainBrowser (aces/brainbrowser).
+Source: https://github.com/aces/brainbrowser/blob/master/examples/models/brain-surface.obj.gz
+Project: https://brainbrowser.cbrain.mcgill.ca/
+Repository license: GNU Affero General Public License v3 (included as LICENSE.txt).
+Original compressed mesh is retained alongside the derived cortex.bin.
+Adaptations: centered, uniformly scaled, axes rotated, split by midline into two
+render groups, and encoded as little-endian indexed geometry. Geometry is not a
+clinical model. Conversion source: scripts/prepare-cortex.py in this project.
+
+
+DCK CORP. 
