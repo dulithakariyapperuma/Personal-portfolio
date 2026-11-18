@@ -94,7 +94,12 @@ export default function Landing() {
     return () => { outside.forEach(el => { el.inert = false; }); window.removeEventListener('keydown', escape); previous?.focus({ preventScroll: true }); };
   }, [entering]);
   useEffect(() => {
-    if (!activity) return;
+    // Also resets the title when arriving with no activity chosen — otherwise
+    // navigating back from a portfolio route leaves that page's title behind.
+    if (!activity) {
+      document.title = 'One connected mind — Dulitha Kariyapperuma';
+      return;
+    }
     setVisited(v => v.includes(`${activity}-${step}`) ? v : [...v, `${activity}-${step}`]);
     document.title = `${activity === 'coding' ? 'Code' : 'Photography'} · One connected mind — Dulitha Kariyapperuma`;
   }, [activity, step]);

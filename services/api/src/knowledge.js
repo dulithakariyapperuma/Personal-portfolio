@@ -24,6 +24,11 @@ export const KNOWLEDGE = [
     text: `The region overlays on the 3D brain are approximate teaching aids based on coordinates, not anatomical atlas parcellations, brain scans, or measured activation. The left/right entrance split is a visual metaphor, not a claim about left-brained and right-brained personality types — that idea is not supported by the evidence, and the site links to the University of Utah research summary saying so. Both hemispheres participate in both activities.`,
   },
   {
+    id: 'programming',
+    topic: 'The programming portfolio — DCK CORP OS',
+    text: `The programming side of the portfolio is DCK CORP OS: a portfolio you operate like a desktop rather than scroll. It has draggable, resizable windows, a project explorer with folders and live filtering, a profile with a searchable certification archive, and a working terminal with its own file tree — cd, ls, cat, open, write, and notes that persist in your browser. There is a synthesized ambient soundscape, off by default, and a guest lock screen. Cmd/Ctrl+K opens Files; Escape closes the top window. The three projects shown are explicitly concept studies, not client work, and the certifications are sample records.`,
+  },
+  {
     id: 'photography',
     topic: 'Blurryblue Photography',
     text: `Blurryblue Photography is Dulitha's photography practice. The gallery holds 35 photographs across three collections: Couples, Portraits, and Moments. The site shows them on an animated wall on the hero, then in a filterable grid, with a full-screen viewer that supports arrow keys and swipe. Every photograph is served as WebP in three sizes so phones do not download a 6000-pixel-wide file.`,

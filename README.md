@@ -7,6 +7,7 @@ load balancing, routing and applied AI on something real.
 | | |
 |---|---|
 | **Landing** | A cortical surface mesh in three.js. Orbit it, pick a hemisphere, read three short lessons with the research behind each claim. |
+| **Programming** | DCK CORP OS: a portfolio you use like a desktop — draggable windows, a project explorer, a working terminal, and a certification archive. |
 | **Photography** | Blurryblue Photography: 35 photographs, an animated wall, a filterable grid, and search by description rather than keyword. |
 | **Assistant** | Answers questions about the site from an indexed knowledge file. Streams. Admits what it does not know. |
 | **Cluster** | nginx edge proxy, three web replicas, two API replicas. One command. |
@@ -57,8 +58,9 @@ npm run build                # production build
 ```
 src/                     the React app
   components/            BrainScene, the photography wall, AskPanel, PhotoSearch
+  dck/                   DCK CORP OS — the programming portfolio desktop
   lib/                   gallery data, brain regions, API client
-  pages/                 Landing, Photography, Portfolio
+  pages/                 Landing, Photography
 services/api/            the AI service — search and the assistant
   src/                   server, embeddings, vector index, RAG
   scripts/build-index.mjs rebuild the vector index
@@ -76,6 +78,9 @@ recovering, the cache going MISS then HIT, the rate limiter tripping.
 principles, why there is no vector database, and how the assistant is kept
 from inventing things.
 
+**[docs/DCK-OS.md](docs/DCK-OS.md)** — the desktop portfolio: its windows,
+terminal commands and certification archive, and what to customise.
+
 ---
 
 ## Performance notes
@@ -87,7 +92,8 @@ The build is split so nothing downloads before it is needed:
 | `index.js` | 217 kB | always |
 | `three.js` | 844 kB | when the 3D brain mounts |
 | `Photography.js` + CSS | 62 kB | only on the photography route |
-| `motion.js` | 151 kB | with the photography page |
+| `DckOs.js` + CSS | 74 kB | only on the programming route |
+| `motion.js` | 151 kB | with either portfolio |
 
 Content-hashed filenames are what make a one-year `immutable` cache header
 safe, and the edge sets exactly that for `/assets/`. `index.html` is never
@@ -97,8 +103,11 @@ cached, because it names those hashed files.
 
 ## Content and scope
 
-The programming portfolio is still a placeholder. The photography is real
-and complete. The experiments on the landing page are implemented
+The photography is real and complete. The three projects in DCK CORP OS are
+explicitly marked concept studies, not client work, and use remote Unsplash
+images — replace them in `src/dck/DckOs.tsx`. The four certifications in
+`src/dck/data/certifications.ts` are sample records and are labelled as
+unverified. The experiments on the landing page are implemented
 demonstrations, not invented client work.
 
 Content and citations live in `src/pages/Landing.tsx`. What the assistant is
