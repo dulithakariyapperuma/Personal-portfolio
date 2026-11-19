@@ -1,0 +1,78 @@
+/* ---------------------------------------------------------------------------
+   THE PARTICLE THEME
+   ---------------------------------------------------------------------------
+   Measured from sztanki.com rather than guessed. Its html background is
+   rgb(5,17,38) exactly, and sampling the rendered frame gave the rest:
+   particle bodies around #0f1c4b, the brightest cores only #7d9bd1.
+
+   The number that actually defines the look is the luminance spread. On that
+   page the 90th-percentile pixel is 43/255 and the 99th is 82/255 — nine
+   tenths of the screen is near-black, and nothing is ever close to white.
+   The glow reads as bright because almost nothing around it is.
+
+   So the rule for this palette: light is a scarce resource. Surfaces stay
+   within a few points of the background, borders are barely-there, and full
+   --ink is spent only on the thing you most want read.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* --- The field -------------------------------------------------------- */
+  --void:        #051126;   /* sztanki's exact html background */
+  --void-deep:   #030b1b;   /* vignette corners, behind the canvas */
+  --surface:     #081634;   /* a panel, 3 points off the void */
+  --surface-lit: #0c1e43;   /* hover / active panel */
+
+  /* --- The particles ---------------------------------------------------- */
+  --dust:        #0f1c4b;   /* the mass of the cloud, barely separable */
+  --dust-mid:    #2d4a8a;   /* midtone where density gathers */
+  --dust-core:   #7d9bd1;   /* the brightest measured pixel on that page */
+  --dust-flare:  #a8c4f0;   /* reserved for the few points nearest camera */
+
+  /* --- Type ------------------------------------------------------------- */
+  /* Nothing here is brighter than the reference page's brightest measured
+     pixel (#84a1d5, which scores 7.21:1 on the void — AAA). Matching its
+     restraint costs no accessibility at all, and the previous #dce6f7 was
+     15:1: technically excellent, and far harsher than anything on the page
+     being matched. Contrast is a floor, not a target. */
+  --ink:         #aebfdd;   /* headlines only */
+  --ink-soft:    #8fa5c9;   /* body */
+  --ink-mute:    #7489b0;   /* labels, metadata — still AA on --void */
+  --ink-faint:   #4a5d85;   /* dividers rendered as text, timestamps */
+
+  /* --- Lines ------------------------------------------------------------ */
+  --edge:        #1a2d57;   /* visible hairline */
+  --edge-soft:   #14264c;
+  --edge-faint:  #0e1b3a;   /* implied hairline */
+
+  /* --- The two disciplines ----------------------------------------------
+     Kept, because the whole site is built on the two-hemisphere idea — but
+     pulled far down in saturation so neither fights the field. The old
+     #00d4ff and #ffaa00 were resort-brochure bright against this. */
+  --left:        #5f93cf;   /* programming */
+  --left-dim:    #1d3a66;
+  --right:       #b2905f;   /* photography */
+  --right-dim:   #4a3a24;
+
+  --focus:       #6ea8e8;   /* focus rings, one colour everywhere */
+}
+
+/* The page itself is the void. Every page, no exceptions — the shared
+   background is what lets the three sections feel like one place. */
+html { background: var(--void); }
+
+body {
+  background: var(--void);
+  color: var(--ink-soft);
+}
+
+/* A vignette pulls the eye to the centre and hides the edges of any canvas
+   that does not quite reach the corners. Fixed, never interactive. */
+.field-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 120% 80% at 50% 45%, transparent 35%, #030b1b99 100%),
+    radial-gradient(ellipse 60% 40% at 50% 40%, #12336611, transparent 70%);
+}

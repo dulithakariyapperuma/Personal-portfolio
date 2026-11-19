@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Landing from '@/pages/Landing';
 import RouteCurtain from '@/components/RouteCurtain';
+import '@/design/theme.css';
 import '@/design/tokens.css';
 
 // Route-level code splitting. Each portfolio is its own world with its own
