@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 64"><path d="M8 54 65 10h25L33 54Z" fill="#171817"/><path d="m53 35 31 19H64L43 42Z" fill="#171817"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 64" role="img" aria-label="DCK CORP">
+  <!-- currentColor, not a baked fill: this mark sits on the void in the
+       chrome and on lit panels inside windows, and a fixed #171817 was
+       invisible against the first. -->
+  <path d="M8 54 65 10h25L33 54Z" fill="currentColor"/>
+  <path d="m53 35 31 19H64L43 42Z" fill="currentColor"/>
+</svg>

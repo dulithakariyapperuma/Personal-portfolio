@@ -1,5 +1,5 @@
 .photo-page {
-  --photo-blue: #020b1c;
+  --photo-blue: var(--void);   /* the one background every page shares */
   --photo-ink: #7ca1e0;
   --photo-muted: #8da2c0;
   --photo-accent: #3678ff;
